@@ -1,52 +1,60 @@
 """
 Fitness Evaluator for Genetic Algorithm
+Evaluates the performance of LSTM models with different hyperparameters
 """
 
 import numpy as np
-from typing import Dict, Tuple
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 import logging
-from models.model_trainer import ModelTrainer
-import config
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
 class FitnessEvaluator:
     """
-    Evaluates fitness of chromosomes based on model performance
+    Evaluates fitness of chromosomes by training and evaluating LSTM models
     """
     
-    def __init__(self, data_dict: Dict):
+    def __init__(self, data_dict):
         """
-        Initialize fitness evaluator
+        Initialize Fitness Evaluator
         
         Args:
             data_dict: Dictionary containing train, val, test data
         """
         self.data_dict = data_dict
-        
-    def calculate_fitness(self, chromosome: 'Chromosome') -> float:
+        self.evaluation_count = 0
+    
+    def evaluate(self, chromosome):
         """
-        Calculate fitness score for a chromosome
+        Evaluate a chromosome by training a model and calculating fitness
         
         Args:
-            chromosome: Chromosome to evaluate
+            chromosome: Chromosome object to evaluate
             
         Returns:
-            Fitness score (higher is better)
+            float: Fitness score (lower is better)
         """
+        self.evaluation_count += 1
+        
         try:
+            # Import here to avoid circular imports
+            from models.model_trainer_torch import ModelTrainer
+            
             # Get hyperparameters from chromosome
             hyperparameters = chromosome.get_hyperparameters()
             
-            logger.info(f"🧬 Evaluating chromosome: {hyperparameters}")
+            # Log evaluation
+            logger.info("=" * 80)
+            logger.info(f"Evaluating Individual {self.evaluation_count}")
+            logger.info("=" * 80)
+            logger.info(f"🧬 Evaluating chromosome: {chromosome.genes}")
             
             # Create and train model
             trainer = ModelTrainer(hyperparameters)
             
             # Prepare data with lookback window
-            lookback = hyperparameters.get('lookback_window', 60)
+            lookback = chromosome.genes['lookback_window']
             prepared_data = trainer.prepare_data(
                 (self.data_dict['X_train'], self.data_dict['y_train']),
                 (self.data_dict['X_val'], self.data_dict['y_val']),
@@ -54,104 +62,168 @@ class FitnessEvaluator:
                 lookback
             )
             
-            # Train model
-            trainer.train_model(prepared_data)
+            # Train model (reduced epochs for GA speed)
+            trainer.train_model(prepared_data, epochs=100, verbose=1)
             
-            # Evaluate model
+            # Evaluate on validation set
             metrics = trainer.evaluate_model(prepared_data)
+            val_metrics = metrics['val']
+            
+            # Calculate fitness score (weighted combination of metrics)
+            # Lower is better, so we want to minimize this
+            fitness = (
+                0.4 * val_metrics['rmse'] +           # 40% weight on RMSE
+                0.3 * val_metrics['mae'] +            # 30% weight on MAE
+                0.2 * (1 - val_metrics['r2_score']) + # 20% weight on R2 (inverted)
+                0.1 * (1 - val_metrics['directional_accuracy'] / 100)  # 10% weight on direction
+            )
+            
+            # Get model complexity (for logging)
+            model_params = self._count_model_parameters(trainer.model)
+            
+            # Log results
+            logger.info(f"📊 Evaluation Results:")
+            logger.info(f"   Validation RMSE: {val_metrics['rmse']:.6f}")
+            logger.info(f"   Validation MAE: {val_metrics['mae']:.6f}")
+            logger.info(f"   Validation R²: {val_metrics['r2_score']:.6f}")
+            logger.info(f"   Directional Accuracy: {val_metrics['directional_accuracy']:.2f}%")
+            logger.info(f"   Model Parameters: {model_params:,}")
+            logger.info(f"   ⭐ Fitness Score: {fitness:.6f}")
+            logger.info("=" * 80)
             
             # Store metrics in chromosome
-            chromosome.metrics = metrics
+            chromosome.fitness = fitness
+            chromosome.metrics = val_metrics
+            chromosome.model_params = model_params
             
-            # Calculate fitness
-            fitness = self._compute_fitness_score(metrics)
-            
-            logger.info(f"✅ Fitness: {fitness:.4f} | Val RMSE: {metrics['val']['rmse']:.4f} | "
-                       f"Val R²: {metrics['val']['r2_score']:.4f}")
+            # Clean up GPU memory if using CUDA
+            import torch
+            if torch.cuda.is_available():
+                del trainer
+                torch.cuda.empty_cache()
             
             return fitness
             
         except Exception as e:
-            logger.error(f"❌ Error evaluating chromosome: {str(e)}")
-            return 0.0
+            logger.error(f"❌ Error evaluating chromosome: {e}")
+            logger.error(f"   Chromosome genes: {chromosome.genes}")
+            
+            # Return a very high fitness score (bad fitness) on error
+            # This ensures failed chromosomes are not selected
+            chromosome.fitness = float('inf')
+            chromosome.metrics = None
+            chromosome.model_params = 0
+            
+            return float('inf')
     
-    def _compute_fitness_score(self, metrics: Dict) -> float:
+    def _count_model_parameters(self, model):
         """
-        Compute fitness score from metrics
+        Count the number of parameters in a PyTorch model
         
         Args:
-            metrics: Dictionary of evaluation metrics
+            model: PyTorch model
             
         Returns:
-            Fitness score
+            int: Number of parameters
         """
-        # Extract validation metrics
-        val_metrics = metrics['val']
-        
-        rmse = val_metrics['rmse']
-        mae = val_metrics['mae']
-        r2 = val_metrics['r2_score']
-        
-        # Model complexity penalty
-        total_params = metrics['total_params']
-        training_time = metrics['training_time']
-        
-        # Normalize complexity penalty (0 to 1)
-        # Penalize models with > 1M parameters and training time > 1 hour
-        complexity_penalty = (total_params / 1_000_000) + (training_time / 3600)
-        complexity_penalty = min(complexity_penalty, 1.0)
-        
-        # Calculate fitness using weighted combination
-        # Higher fitness is better
-        weights = config.FITNESS_WEIGHTS
-        
-        # For RMSE and MAE, lower is better, so we use inverse
-        # Add small epsilon to avoid division by zero
-        epsilon = 1e-8
-        
-        fitness = (
-            weights['rmse_weight'] * (1.0 / (rmse + epsilon)) +
-            weights['mae_weight'] * (1.0 / (mae + epsilon)) +
-            weights['r2_weight'] * max(r2, 0) -  # R² can be negative, so clamp to 0
-            weights['complexity_weight'] * complexity_penalty
-        )
-        
-        # Normalize fitness to reasonable range
-        fitness = fitness * 100
-        
-        return fitness
+        try:
+            import torch
+            if isinstance(model, torch.nn.Module):
+                return sum(p.numel() for p in model.parameters())
+            else:
+                return 0
+        except Exception as e:
+            logger.warning(f"Could not count model parameters: {e}")
+            return 0
     
-    def evaluate_population(self, population: list) -> list:
+    def evaluate_final(self, chromosome):
         """
-        Evaluate fitness for entire population
+        Final evaluation on test set with full training
         
         Args:
-            population: List of chromosomes
+            chromosome: Chromosome to evaluate
             
         Returns:
-            List of chromosomes with fitness scores
+            dict: Complete metrics for train, val, and test sets
         """
-        logger.info(f"🔬 Evaluating population of {len(population)} individuals...")
-        
-        for i, chromosome in enumerate(population):
-            logger.info(f"\n{'='*80}")
-            logger.info(f"Evaluating Individual {i+1}/{len(population)}")
-            logger.info(f"{'='*80}")
+        try:
+            from models.model_trainer_torch import ModelTrainer
             
-            fitness = self.calculate_fitness(chromosome)
-            chromosome.fitness = fitness
+            hyperparameters = chromosome.get_hyperparameters()
+            
+            logger.info("=" * 80)
+            logger.info("FINAL EVALUATION")
+            logger.info("=" * 80)
+            logger.info(f"🏆 Evaluating best chromosome: {chromosome.genes}")
+            
+            # Create and train model
+            trainer = ModelTrainer(hyperparameters)
+            
+            # Prepare data
+            lookback = chromosome.genes['lookback_window']
+            prepared_data = trainer.prepare_data(
+                (self.data_dict['X_train'], self.data_dict['y_train']),
+                (self.data_dict['X_val'], self.data_dict['y_val']),
+                (self.data_dict['X_test'], self.data_dict['y_test']),
+                lookback
+            )
+            
+            # Train with full epochs
+            trainer.train_model(prepared_data, verbose=1)
+            
+            # Get complete metrics
+            all_metrics = trainer.evaluate_model(prepared_data)
+            
+            # Log results
+            logger.info("\n📊 Final Evaluation Results:")
+            for dataset in ['train', 'val', 'test']:
+                logger.info(f"\n{dataset.upper()} SET:")
+                metrics = all_metrics[dataset]
+                logger.info(f"   RMSE: {metrics['rmse']:.6f}")
+                logger.info(f"   MAE: {metrics['mae']:.6f}")
+                logger.info(f"   R²: {metrics['r2_score']:.6f}")
+                logger.info(f"   Directional Accuracy: {metrics['directional_accuracy']:.2f}%")
+            
+            logger.info("=" * 80)
+            
+            return all_metrics
+            
+        except Exception as e:
+            logger.error(f"❌ Error in final evaluation: {e}")
+            return None
+    
+    def batch_evaluate(self, chromosomes):
+        """
+        Evaluate multiple chromosomes
         
-        # Sort population by fitness (descending)
-        population.sort(key=lambda x: x.fitness, reverse=True)
+        Args:
+            chromosomes: List of chromosomes to evaluate
+            
+        Returns:
+            list: List of fitness scores
+        """
+        fitness_scores = []
         
-        logger.info(f"\n✅ Population evaluation complete!")
-        logger.info(f"   Best fitness: {population[0].fitness:.4f}")
-        logger.info(f"   Worst fitness: {population[-1].fitness:.4f}")
-        logger.info(f"   Average fitness: {np.mean([c.fitness for c in population]):.4f}")
+        logger.info(f"\n🔬 Batch Evaluating {len(chromosomes)} chromosomes...")
         
-        return population
-
-
-if __name__ == "__main__":
-    print("🔬 Testing Fitness Evaluator...")
-    print("Note: Requires actual data to test properly")
+        for i, chromosome in enumerate(chromosomes, 1):
+            logger.info(f"\n📊 Evaluating chromosome {i}/{len(chromosomes)}")
+            fitness = self.evaluate(chromosome)
+            fitness_scores.append(fitness)
+        
+        return fitness_scores
+    
+    def get_evaluation_count(self):
+        """
+        Get the total number of evaluations performed
+        
+        Returns:
+            int: Number of evaluations
+        """
+        return self.evaluation_count
+    
+    def reset_count(self):
+        """
+        Reset the evaluation counter
+        """
+        self.evaluation_count = 0

@@ -1,119 +1,188 @@
 """
 Chromosome representation for Genetic Algorithm
+Encodes LSTM model hyperparameters
 """
 
-import random
 import numpy as np
-from typing import Dict, Any
-import config
+import random
 import logging
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
 class Chromosome:
     """
-    Represents a chromosome (individual) in the genetic algorithm
-    Each chromosome encodes hyperparameters for the LSTM model
+    Represents a set of hyperparameters as a chromosome
     """
     
-    def __init__(self, genes: Dict[str, Any] = None):
+    # Define the hyperparameter search space
+    GENE_SPACE = {
+        'n_lstm_layers': [1, 2, 3],
+        'neurons_layer1': [64, 128, 256],
+        'neurons_layer2': [32, 64, 128, 256],
+        'neurons_layer3': [16, 32, 64, 128],
+        'learning_rate': [0.0001, 0.0005, 0.001, 0.005, 0.01],
+        'batch_size': [16, 32, 64, 128],
+        'dropout_rate': [0.1, 0.2, 0.3, 0.4, 0.5],
+        'lookback_window': [30, 60, 90, 120],
+        'optimizer': ['adam', 'rmsprop', 'sgd'],
+        'dense_units': [16, 32, 64, 128],
+        'use_bidirectional': [True, False]
+    }
+    
+    def __init__(self, genes=None):
         """
-        Initialize chromosome
+        Initialize chromosome with genes
         
         Args:
-            genes: Dictionary of genes (hyperparameters)
+            genes: Dictionary of hyperparameters (optional)
         """
         if genes is None:
-            self.genes = self._initialize_random_genes()
+            # Create random genes
+            self.genes = self._create_random_genes()
         else:
-            self.genes = genes
+            self.genes = genes.copy()
         
-        self.fitness = 0.0
-        self.metrics = {}
-        
-    def _initialize_random_genes(self) -> Dict[str, Any]:
+        self.fitness = None
+        self.metrics = None
+        self.model_params = 0
+    
+    def _create_random_genes(self):
         """
-        Initialize chromosome with random genes
+        Create random genes from gene space
         
         Returns:
-            Dictionary of random genes
+            Dictionary of random hyperparameters
         """
         genes = {}
-        
-        for gene_name, gene_space in config.GENE_SPACE.items():
-            genes[gene_name] = random.choice(gene_space)
-        
+        for gene_name, gene_values in self.GENE_SPACE.items():
+            genes[gene_name] = random.choice(gene_values)
         return genes
     
-    def get_hyperparameters(self) -> Dict[str, Any]:
+    def get_hyperparameters(self):
         """
-        Get hyperparameters from genes
+        Get hyperparameters in format suitable for model training
         
         Returns:
             Dictionary of hyperparameters
         """
-        return self.genes.copy()
+        # Add default values for additional hyperparameters
+        hyperparameters = self.genes.copy()
+        
+        # Add epochs (not evolved, fixed)
+        hyperparameters['epochs'] = 100
+        
+        return hyperparameters
     
-    def mutate(self, mutation_rate: float = 0.15):
+    def mutate(self, mutation_rate=0.1):
         """
-        Mutate the chromosome
+        Mutate genes with given probability
         
         Args:
             mutation_rate: Probability of mutation for each gene
-        """
-        for gene_name, gene_space in config.GENE_SPACE.items():
-            if random.random() < mutation_rate:
-                self.genes[gene_name] = random.choice(gene_space)
-                logger.debug(f"Mutated {gene_name} to {self.genes[gene_name]}")
-    
-    @staticmethod
-    def crossover(parent1: 'Chromosome', parent2: 'Chromosome', 
-                  crossover_rate: float = 0.8) -> tuple:
-        """
-        Perform crossover between two parent chromosomes
-        
-        Args:
-            parent1: First parent chromosome
-            parent2: Second parent chromosome
-            crossover_rate: Probability of crossover
             
         Returns:
-            Tuple of two offspring chromosomes
+            New mutated chromosome
         """
-        if random.random() > crossover_rate:
-            # No crossover, return copies of parents
-            return Chromosome(parent1.genes.copy()), Chromosome(parent2.genes.copy())
+        new_genes = self.genes.copy()
         
-        # Uniform crossover
-        child1_genes = {}
-        child2_genes = {}
+        for gene_name in new_genes.keys():
+            if random.random() < mutation_rate:
+                # Mutate this gene
+                new_genes[gene_name] = random.choice(self.GENE_SPACE[gene_name])
         
-        for gene_name in parent1.genes.keys():
-            if random.random() < 0.5:
-                child1_genes[gene_name] = parent1.genes[gene_name]
-                child2_genes[gene_name] = parent2.genes[gene_name]
-            else:
-                child1_genes[gene_name] = parent2.genes[gene_name]
-                child2_genes[gene_name] = parent1.genes[gene_name]
-        
-        return Chromosome(child1_genes), Chromosome(child2_genes)
+        return Chromosome(new_genes)
     
-    def __str__(self) -> str:
+    def crossover(self, other):
         """
-        String representation of chromosome
+        Perform crossover with another chromosome
+        
+        Args:
+            other: Another chromosome
+            
+        Returns:
+            Two new offspring chromosomes
+        """
+        # Single-point crossover
+        genes1 = {}
+        genes2 = {}
+        
+        gene_names = list(self.genes.keys())
+        crossover_point = random.randint(0, len(gene_names))
+        
+        for i, gene_name in enumerate(gene_names):
+            if i < crossover_point:
+                genes1[gene_name] = self.genes[gene_name]
+                genes2[gene_name] = other.genes[gene_name]
+            else:
+                genes1[gene_name] = other.genes[gene_name]
+                genes2[gene_name] = self.genes[gene_name]
+        
+        return Chromosome(genes1), Chromosome(genes2)
+    
+    def copy(self):
+        """
+        Create a copy of this chromosome
+        
+        Returns:
+            New chromosome with same genes
+        """
+        new_chromosome = Chromosome(self.genes.copy())
+        new_chromosome.fitness = self.fitness
+        new_chromosome.metrics = self.metrics
+        new_chromosome.model_params = self.model_params
+        return new_chromosome
+    
+    def __str__(self):
+        """
+        String representation
+        
+        Returns:
+            String description of chromosome
+        """
+        return f"Chromosome(fitness={self.fitness:.6f if self.fitness else 'None'}, genes={self.genes})"
+    
+    def __repr__(self):
+        """
+        Representation for debugging
         
         Returns:
             String representation
         """
-        genes_str = ", ".join([f"{k}={v}" for k, v in self.genes.items()])
-        return f"Chromosome(fitness={self.fitness:.4f}, genes=[{genes_str}])"
-    
-    def __repr__(self) -> str:
         return self.__str__()
     
-    def to_dict(self) -> Dict:
+    def __lt__(self, other):
+        """
+        Less than comparison (for sorting)
+        Lower fitness is better
+        
+        Args:
+            other: Another chromosome
+            
+        Returns:
+            bool: True if this chromosome is better (lower fitness)
+        """
+        if self.fitness is None:
+            return False
+        if other.fitness is None:
+            return True
+        return self.fitness < other.fitness
+    
+    def __eq__(self, other):
+        """
+        Equality comparison
+        
+        Args:
+            other: Another chromosome
+            
+        Returns:
+            bool: True if genes are identical
+        """
+        if not isinstance(other, Chromosome):
+            return False
+        return self.genes == other.genes
+    
+    def to_dict(self):
         """
         Convert chromosome to dictionary
         
@@ -123,50 +192,23 @@ class Chromosome:
         return {
             'genes': self.genes,
             'fitness': self.fitness,
-            'metrics': self.metrics
+            'metrics': self.metrics,
+            'model_params': self.model_params
         }
     
-    def from_dict(self, data: Dict):
+    @classmethod
+    def from_dict(cls, data):
         """
-        Load chromosome from dictionary
+        Create chromosome from dictionary
         
         Args:
             data: Dictionary with chromosome data
-        """
-        self.genes = data['genes']
-        self.fitness = data.get('fitness', 0.0)
-        self.metrics = data.get('metrics', {})
-    
-    def clone(self) -> 'Chromosome':
-        """
-        Create a clone of this chromosome
-        
+            
         Returns:
-            Cloned chromosome
+            New chromosome
         """
-        cloned = Chromosome(self.genes.copy())
-        cloned.fitness = self.fitness
-        cloned.metrics = self.metrics.copy()
-        return cloned
-
-
-if __name__ == "__main__":
-    # Test chromosome
-    print("🧬 Testing Chromosome...")
-    
-    # Create random chromosome
-    chrom1 = Chromosome()
-    print(f"\nChromosome 1:\n{chrom1}")
-    
-    # Create another chromosome
-    chrom2 = Chromosome()
-    print(f"\nChromosome 2:\n{chrom2}")
-    
-    # Test crossover
-    child1, child2 = Chromosome.crossover(chrom1, chrom2)
-    print(f"\nChild 1 after crossover:\n{child1}")
-    print(f"\nChild 2 after crossover:\n{child2}")
-    
-    # Test mutation
-    child1.mutate(mutation_rate=0.3)
-    print(f"\nChild 1 after mutation:\n{child1}")
+        chromosome = cls(data['genes'])
+        chromosome.fitness = data.get('fitness')
+        chromosome.metrics = data.get('metrics')
+        chromosome.model_params = data.get('model_params', 0)
+        return chromosome

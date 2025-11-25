@@ -1,11 +1,13 @@
 """
 Main execution script for Stock Prediction with GA Optimization
+PyTorch CUDA Version
 """
 
 import numpy as np
 import pandas as pd
 import logging
 import sys
+import torch
 import os
 from datetime import datetime
 import argparse
@@ -15,13 +17,14 @@ warnings.filterwarnings('ignore')
 # Set random seeds for reproducibility
 import config
 np.random.seed(config.RANDOM_SEED)
-import tensorflow as tf
-tf.random.set_seed(config.RANDOM_SEED)
+torch.manual_seed(config.RANDOM_SEED)
+if torch.cuda.is_available():
+    torch.cuda.manual_seed_all(config.RANDOM_SEED)
 
 from data.data_collector import StockDataCollector
 from data.data_preprocessor import DataPreprocessor
 from optimization.genetic_algorithm import GeneticAlgorithm
-from models.model_trainer import ModelTrainer
+from models.model_trainer_torch import ModelTrainer
 from utils.visualization import (plot_predictions, plot_multiple_predictions, 
                                  plot_ga_evolution, plot_stock_prices)
 from utils.metrics import print_metrics, compare_models
@@ -38,6 +41,112 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+def check_and_configure_gpu():
+    """
+    Check GPU availability and configure PyTorch for optimal GPU usage
+    
+    Returns:
+        bool: True if GPU is available and configured, False otherwise
+    """
+    logger.info("="*80)
+    logger.info("🔍 GPU CONFIGURATION CHECK")
+    logger.info("="*80)
+    
+    # Check PyTorch
+    logger.info(f"PyTorch Version: {torch.__version__}")
+    
+    # Check CUDA availability
+    cuda_available = torch.cuda.is_available()
+    logger.info(f"CUDA Available: {cuda_available}")
+    
+    if cuda_available:
+        logger.info(f"CUDA Version: {torch.version.cuda}")
+        
+        # Get GPU information
+        gpu_count = torch.cuda.device_count()
+        logger.info(f"\n✅ {gpu_count} GPU(s) detected!")
+        
+        for i in range(gpu_count):
+            logger.info(f"\n🎮 GPU {i}:")
+            logger.info(f"   Name: {torch.cuda.get_device_name(i)}")
+            
+            props = torch.cuda.get_device_properties(i)
+            logger.info(f"   Total Memory: {props.total_memory / 1024**3:.2f} GB")
+        
+        # Set current device
+        torch.cuda.set_device(0)
+        logger.info(f"\n✅ Using GPU: {torch.cuda.get_device_name(0)}")
+        
+        # Enable cuDNN benchmarking
+        torch.backends.cudnn.benchmark = True
+        logger.info("✅ cuDNN benchmarking enabled")
+        
+        logger.info("\n" + "="*80)
+        logger.info("🚀 GPU CONFIGURATION SUCCESSFUL!")
+        logger.info("="*80 + "\n")
+        
+        return True
+    else:
+        logger.warning("\n⚠️  NO GPU DETECTED - Using CPU")
+        logger.info("="*80 + "\n")
+        return False
+
+
+def verify_gpu_usage():
+    """
+    Verify that GPU is actually being used during computation
+    
+    Returns:
+        bool: True if GPU is being utilized
+    """
+    if not torch.cuda.is_available():
+        logger.warning("⚠️  CUDA not available, cannot verify GPU usage")
+        return False
+    
+    logger.info("🔬 Verifying GPU Usage...")
+    
+    device = torch.device('cuda:0')
+    
+    try:
+        # Create test tensors on GPU
+        a = torch.randn(2000, 2000, device=device)
+        b = torch.randn(2000, 2000, device=device)
+        
+        # Warm-up
+        for _ in range(3):
+            c = torch.matmul(a, b)
+            torch.cuda.synchronize()
+        
+        # Measure time
+        start = datetime.now()
+        for _ in range(10):
+            c = torch.matmul(a, b)
+        torch.cuda.synchronize()
+        end = datetime.now()
+        
+        duration = (end - start).total_seconds()
+        
+        # Get memory usage
+        memory_allocated = torch.cuda.memory_allocated(0) / 1024**2
+        memory_reserved = torch.cuda.memory_reserved(0) / 1024**2
+        
+        logger.info(f"✅ GPU is active!")
+        logger.info(f"   Device: {c.device}")
+        logger.info(f"   Computation time (10 iterations): {duration:.4f} seconds")
+        logger.info(f"   GPU Memory Allocated: {memory_allocated:.2f} MB")
+        logger.info(f"   GPU Memory Reserved: {memory_reserved:.2f} MB")
+        
+        # Clean up
+        del a, b, c
+        torch.cuda.empty_cache()
+        
+        return True
+        
+    except Exception as e:
+        logger.error(f"❌ GPU verification failed: {e}")
+        return False
+
+
 def parse_arguments():
     """
     Parse command line arguments
@@ -45,7 +154,7 @@ def parse_arguments():
     Returns:
         Parsed arguments
     """
-    parser = argparse.ArgumentParser(description='Stock Prediction with GA Optimization')
+    parser = argparse.ArgumentParser(description='Stock Prediction with GA Optimization (PyTorch)')
     
     parser.add_argument('--population_size', type=int, default=25,
                        help='Population size for GA')
@@ -57,6 +166,10 @@ def parse_arguments():
                        help='Skip data collection and use existing data')
     parser.add_argument('--run_baseline', action='store_true', default=True,
                        help='Run baseline model for comparison (default: True)')
+    parser.add_argument('--force_cpu', action='store_true',
+                       help='Force CPU usage even if GPU is available')
+    parser.add_argument('--no_baseline', action='store_true',
+                       help='Skip baseline model training')
     
     return parser.parse_args()
 
@@ -223,7 +336,7 @@ def run_baseline_model(data_dict, scalers):
     logger.info("BASELINE MODEL (Before Optimization)")
     logger.info("="*80)
     
-    # Simple baseline hyperparameters (commonly used defaults)
+    # Simple baseline hyperparameters
     baseline_hyperparameters = {
         'n_lstm_layers': 2,
         'neurons_layer1': 128,
@@ -235,7 +348,8 @@ def run_baseline_model(data_dict, scalers):
         'batch_size': 32,
         'lookback_window': 60,
         'dense_units': 32,
-        'use_bidirectional': False
+        'use_bidirectional': False,
+        'epochs': 100
     }
     
     logger.info("\n📋 Baseline Hyperparameters:")
@@ -251,6 +365,14 @@ def run_baseline_model(data_dict, scalers):
         60
     )
     
+    # Log GPU usage during training
+    logger.info("\n🎮 Training baseline model...")
+    if torch.cuda.is_available():
+        logger.info(f"   Device: GPU ({torch.cuda.get_device_name(0)})")
+        logger.info("   ⚡ Watch Task Manager -> Performance -> GPU -> CUDA")
+    else:
+        logger.info("   Device: CPU")
+    
     trainer.train_model(prepared_data)
     metrics = trainer.evaluate_model(prepared_data)
     
@@ -265,7 +387,9 @@ def run_baseline_model(data_dict, scalers):
     # Inverse transform predictions
     target_scaler = scalers['target']
     
-    y_test_true = target_scaler.inverse_transform(prepared_data['y_test'].reshape(-1, 1))
+    y_test_true = target_scaler.inverse_transform(
+        prepared_data['y_test'].cpu().numpy().reshape(-1, 1)
+    )
     y_test_pred = target_scaler.inverse_transform(predictions['test'])
     
     # Plot baseline predictions
@@ -274,7 +398,11 @@ def run_baseline_model(data_dict, scalers):
                     save_path=os.path.join(config.RESULTS_DIR, 'baseline_predictions.png'))
     
     # Save baseline model
-    trainer.save_model(f"baseline_model_{datetime.now().strftime('%Y%m%d_%H%M%S')}.h5")
+    trainer.save_model(f"baseline_model_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pt")
+    
+    # Clear GPU cache
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
     
     return metrics, predictions
 
@@ -294,6 +422,13 @@ def run_genetic_algorithm(data_dict, population_size, generations):
     logger.info("\n" + "="*80)
     logger.info("GENETIC ALGORITHM OPTIMIZATION")
     logger.info("="*80)
+    
+    # Log GPU status
+    if torch.cuda.is_available():
+        logger.info(f"🎮 GA will utilize GPU: {torch.cuda.get_device_name(0)}")
+        logger.info("   ⚡ This will take some time. Watch GPU usage in Task Manager!")
+    else:
+        logger.info("💻 GA will utilize CPU for model training")
     
     ga = GeneticAlgorithm(data_dict, population_size, generations)
     ga.evolve()
@@ -342,6 +477,12 @@ def evaluate_best_model(ga, data_dict, scalers):
         lookback
     )
     
+    logger.info("\n🎮 Training optimized model...")
+    if torch.cuda.is_available():
+        logger.info(f"   Device: GPU ({torch.cuda.get_device_name(0)})")
+    else:
+        logger.info("   Device: CPU")
+    
     trainer.train_model(prepared_data)
     metrics = trainer.evaluate_model(prepared_data)
     
@@ -357,13 +498,19 @@ def evaluate_best_model(ga, data_dict, scalers):
     # Inverse transform predictions
     target_scaler = scalers['target']
     
-    y_train_true = target_scaler.inverse_transform(prepared_data['y_train'].reshape(-1, 1))
+    y_train_true = target_scaler.inverse_transform(
+        prepared_data['y_train'].cpu().numpy().reshape(-1, 1)
+    )
     y_train_pred = target_scaler.inverse_transform(predictions['train'])
     
-    y_val_true = target_scaler.inverse_transform(prepared_data['y_val'].reshape(-1, 1))
+    y_val_true = target_scaler.inverse_transform(
+        prepared_data['y_val'].cpu().numpy().reshape(-1, 1)
+    )
     y_val_pred = target_scaler.inverse_transform(predictions['val'])
     
-    y_test_true = target_scaler.inverse_transform(prepared_data['y_test'].reshape(-1, 1))
+    y_test_true = target_scaler.inverse_transform(
+        prepared_data['y_test'].cpu().numpy().reshape(-1, 1)
+    )
     y_test_pred = target_scaler.inverse_transform(predictions['test'])
     
     # Plot predictions
@@ -383,7 +530,11 @@ def evaluate_best_model(ga, data_dict, scalers):
     
     # Save best model
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    trainer.save_model(f"optimized_model_{timestamp}.h5")
+    trainer.save_model(f"optimized_model_{timestamp}.pt")
+    
+    # Clear GPU cache
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
     
     return predictions_dict, metrics
 
@@ -477,12 +628,30 @@ def main():
     """
     logger.info("\n" + "="*80)
     logger.info("🚀 STOCK PREDICTION WITH GENETIC ALGORITHM OPTIMIZATION")
+    logger.info("   PyTorch CUDA Version")
     logger.info("="*80 + "\n")
     
     # Parse arguments
     args = parse_arguments()
+
     
     try:
+        # Configure GPU/CPU
+        gpu_available = check_and_configure_gpu()
+        if args.force_cpu:
+            logger.info("⚠️  Forcing CPU usage (--force_cpu flag set)")
+            # Disable CUDA
+            import os
+            os.environ['CUDA_VISIBLE_DEVICES'] = ''
+            gpu_available = False
+        else:
+            gpu_available = check_and_configure_gpu()
+            
+            # Verify GPU usage
+            if gpu_available:
+                verify_gpu_usage()
+    
+        
         # Step 1: Collect Data
         if args.skip_data_collection:
             collector = StockDataCollector(args.banks)
@@ -502,7 +671,7 @@ def main():
         
         # Step 4: Run Baseline Model
         baseline_metrics = None
-        if args.run_baseline:
+        if args.run_baseline and not args.no_baseline:
             baseline_metrics, _ = run_baseline_model(data_dict, scalers)
         
         # Step 5: Run Genetic Algorithm
@@ -515,6 +684,20 @@ def main():
         if baseline_metrics:
             compare_baseline_vs_optimized(baseline_metrics, optimized_metrics)
         
+        # Final GPU usage summary
+        logger.info("\n" + "="*80)
+        logger.info("📊 EXECUTION SUMMARY")
+        logger.info("="*80)
+        
+        if gpu_available and not args.force_cpu:
+            logger.info("✅ Training completed using GPU acceleration")
+            if torch.cuda.is_available():
+                logger.info(f"   GPU: {torch.cuda.get_device_name(0)}")
+                logger.info(f"   Total GPU Memory: {torch.cuda.get_device_properties(0).total_memory / 1024**3:.2f} GB")
+                logger.info(f"   Peak GPU Memory Used: {torch.cuda.max_memory_allocated(0) / 1024**3:.2f} GB")
+        else:
+            logger.info("✅ Training completed using CPU")
+        
         logger.info("\n" + "="*80)
         logger.info("✅ EXECUTION COMPLETED SUCCESSFULLY!")
         logger.info("="*80 + "\n")
@@ -526,6 +709,11 @@ def main():
     except Exception as e:
         logger.error(f"\n❌ ERROR: {str(e)}", exc_info=True)
         sys.exit(1)
+    finally:
+        # Clean up GPU memory
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+            logger.info("\n🧹 GPU memory cleaned up")
 
 
 if __name__ == "__main__":
