@@ -332,24 +332,33 @@ class GeneticAlgorithm:
     def save_checkpoint(self, filename):
         """
         Save GA checkpoint
-        
+    
         Args:
             filename: Name of checkpoint file
         """
         import config
         filepath = os.path.join(config.RESULTS_DIR, filename)
+    
+        try:
+            checkpoint = {
+                'population': [ind.to_dict() for ind in self.population],
+                'best_chromosome': self.best_chromosome.to_dict() if self.best_chromosome else None,
+                'history': {
+                    'generation': [int(x) for x in self.history['generation']],
+                'best_fitness': [float(x) for x in self.history['best_fitness']],
+                'average_fitness': [float(x) for x in self.history['average_fitness']],
+                'worst_fitness': [float(x) for x in self.history['worst_fitness']],
+                'std_fitness': [float(x) for x in self.history['std_fitness']]
+            },
+            'evaluator_count': int(self.evaluator.get_evaluation_count())
+            }
         
-        checkpoint = {
-            'population': [ind.to_dict() for ind in self.population],
-            'best_chromosome': self.best_chromosome.to_dict() if self.best_chromosome else None,
-            'history': self.history,
-            'evaluator_count': self.evaluator.get_evaluation_count()
-        }
+            with open(filepath, 'w') as f:
+                json.dump(checkpoint, f, indent=2)
         
-        with open(filepath, 'w') as f:
-            json.dump(checkpoint, f, indent=2)
-        
-        logger.info(f"💾 Checkpoint saved: {filename}")
+            logger.info(f"💾 Checkpoint saved: {filename}")
+        except Exception as e:
+            logger.error(f"❌ Failed to save checkpoint: {e}")
     
     def load_checkpoint(self, filename):
         """

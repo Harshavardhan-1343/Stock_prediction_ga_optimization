@@ -1,0 +1,104 @@
+{
+  "generation": 0,
+  "population_size": 30,
+  "best_chromosome": {
+    "genes": {
+      "n_lstm_layers": 3,
+      "neurons_layer1": 64,
+      "neurons_layer2": 128,
+      "neurons_layer3": 64,
+      "learning_rate": 0.001,
+      "batch_size": 16,
+      "dropout_rate": 0.5,
+      "lookback_window": 30,
+      "optimizer": "adam",
+      "dense_units": 16,
+      "use_bidirectional": false
+    },
+    "fitness": 0.0,
+    "metrics": {
+      "train": {
+        "rmse": "0.046009067",
+        "mae": "0.03685735",
+        "r2_score": 0.9639561397177835,
+        "mape": 113750325.0,
+        "directional_accuracy": 50.34168564920274,
+        "explained_variance": 0.9639561397177835
+      },
+      "val": {
+        "rmse": "0.060360983",
+        "mae": "0.05059122",
+        "r2_score": 0.6273782675275563,
+        "mape": 5.765814706683159,
+        "directional_accuracy": 49.80544747081712,
+        "explained_variance": 0.6273782675275563
+      },
+      "test": {
+        "rmse": "0.1822013",
+        "mae": "0.1732432",
+        "r2_score": -0.9457233393230717,
+        "mape": 14.304950833320618,
+        "directional_accuracy": 48.64864864864865,
+        "explained_variance": -0.9457233393230717
+      }
+    }
+  },
+  "history": {
+    "generation": [
+      1
+    ],
+    "best_fitness": [
+      0.0
+    ],
+    "avg_fitness": [
+      0.0
+    ],
+    "worst_fitness": [
+      0.0
+    ],
+    "best_chromosome": [
+      {
+        "genes": {
+          "n_lstm_layers": 3,
+          "neurons_layer1": 64,
+          "neurons_layer2": 128,
+          "neurons_layer3": 64,
+          "learning_rate": 0.001,
+          "batch_size": 16,
+          "dropout_rate": 0.5,
+          "lookback_window": 30,
+          "optimizer": "adam",
+          "dense_units": 16,
+          "use_bidirectional": false
+        },
+        "fitness": 0.0,
+        "metrics": {
+          "train": {
+            "rmse": "0.046009067",
+            "mae": "0.03685735",
+            "r2_score": 0.9639561397177835,
+            "mape": 113750325.0,
+            "directional_accuracy": 50.34168564920274,
+            "explained_variance": 0.9639561397177835
+          },
+          "val": {
+            "rmse": "0.060360983",
+            "mae": "0.05059122",
+            "r2_score": 0.6273782675275563,
+            "mape": 5.765814706683159,
+            "directional_accuracy": 49.80544747081712,
+            "explained_variance": 0.6273782675275563
+          },
+          "test": {
+            "rmse": "0.1822013",
+            "mae": "0.1732432",
+            "r2_score": -0.9457233393230717,
+            "mape": 14.304950833320618,
+            "directional_accuracy": 48.64864864864865,
+            "explained_variance": -0.9457233393230717
+          }
+        }
+      }
+    ]
+  }
+}

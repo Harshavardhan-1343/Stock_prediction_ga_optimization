@@ -1,0 +1,817 @@
+{
+  "population": [
+    {
+      "genes": {
+        "n_lstm_layers": 1,
+        "neurons_layer1": 256,
+        "neurons_layer2": 128,
+        "neurons_layer3": 128,
+        "learning_rate": 0.0001,
+        "batch_size": 16,
+        "dropout_rate": 0.1,
+        "lookback_window": 30,
+        "optimizer": "adam",
+        "dense_units": 128,
+        "use_bidirectional": true
+      },
+      "fitness": 0.07524232482598614,
+      "metrics": {
+        "rmse": 0.023109637200832367,
+        "mae": 0.01626722142100334,
+        "r2_score": 0.9453812450491534,
+        "mape": 1.9614674150943756,
+        "directional_accuracy": 49.80544747081712,
+        "explained_variance": 0.9453812450491534
+      },
+      "model_params": 688385
+    },
+    {
+      "genes": {
+        "n_lstm_layers": 1,
+        "neurons_layer1": 64,
+        "neurons_layer2": 128,
+        "neurons_layer3": 16,
+        "learning_rate": 0.001,
+        "batch_size": 32,
+        "dropout_rate": 0.1,
+        "lookback_window": 90,
+        "optimizer": "rmsprop",
+        "dense_units": 64,
+        "use_bidirectional": true
+      },
+      "fitness": 0.07586963878545729,
+      "metrics": {
+        "rmse": 0.024936074391007423,
+        "mae": 0.01807437092065811,
+        "r2_score": 0.9463664757027207,
+        "mape": 2.195647358894348,
+        "directional_accuracy": 50.25380710659898,
+        "explained_variance": 0.9463664757027207
+      },
+      "model_params": 65665
+    },
+    {
+      "genes": {
+        "n_lstm_layers": 1,
+        "neurons_layer1": 128,
+        "neurons_layer2": 128,
+        "neurons_layer3": 128,
+        "learning_rate": 0.001,
+        "batch_size": 64,
+        "dropout_rate": 0.1,
+        "lookback_window": 30,
+        "optimizer": "adam",
+        "dense_units": 128,
+        "use_bidirectional": true
+      },
+      "fitness": 0.07610667823929587,
+      "metrics": {
+        "rmse": 0.023631563410162926,
+        "mae": 0.016789184883236885,
+        "r2_score": 0.9428862755946162,
+        "mape": 2.043314278125763,
+        "directional_accuracy": 49.80544747081712,
+        "explained_variance": 0.9428862755946162
+      },
+      "model_params": 213249
+    },
+    {
+      "genes": {
+        "n_lstm_layers": 1,
+        "neurons_layer1": 128,
+        "neurons_layer2": 256,
+        "neurons_layer3": 128,
+        "learning_rate": 0.001,
+        "batch_size": 32,
+        "dropout_rate": 0.1,
+        "lookback_window": 120,
+        "optimizer": "rmsprop",
+        "dense_units": 64,
+        "use_bidirectional": true
+      },
+      "fitness": 0.07611199504824771,
+      "metrics": {
+        "rmse": 0.0265563502907753,
+        "mae": 0.018955443054437637,
+        "r2_score": 0.9405068480058009,
+        "mape": 2.3043110966682434,
+        "directional_accuracy": 52.09580838323353,
+        "explained_variance": 0.9405068480058009
+      },
+      "model_params": 196737
+    },
+    {
+      "genes": {
+        "n_lstm_layers": 1,
+        "neurons_layer1": 128,
+        "neurons_layer2": 128,
+        "neurons_layer3": 16,
+        "learning_rate": 0.001,
+        "batch_size": 32,
+        "dropout_rate": 0.1,
+        "lookback_window": 90,
+        "optimizer": "rmsprop",
+        "dense_units": 64,
+        "use_bidirectional": true
+      },
+      "fitness": 0.07612434933224449,
+      "metrics": {
+        "rmse": 0.02518358640372753,
+        "mae": 0.01788005605340004,
+        "r2_score": 0.9452964746933378,
+        "mape": 2.1761933341622353,
+        "directional_accuracy": 50.25380710659898,
+        "explained_variance": 0.9452964746933378
+      },
+      "model_params": 196737
+    },
+    {
+      "genes": {
+        "n_lstm_layers": 1,
+        "neurons_layer1": 256,
+        "neurons_layer2": 32,
+        "neurons_layer3": 128,
+        "learning_rate": 0.0001,
+        "batch_size": 16,
+        "dropout_rate": 0.1,
+        "lookback_window": 30,
+        "optimizer": "adam",
+        "dense_units": 128,
+        "use_bidirectional": true
+      },
+      "fitness": 0.07632196663809368,
+      "metrics": {
+        "rmse": 0.023524951189756393,
+        "mae": 0.016694728285074234,
+        "r2_score": 0.943400449554399,
+        "mape": 2.030434086918831,
+        "directional_accuracy": 49.416342412451364,
+        "explained_variance": 0.943400449554399
+      },
+      "model_params": 688385
+    },
+    {
+      "genes": {
+        "n_lstm_layers": 1,
+        "neurons_layer1": 256,
+        "neurons_layer2": 256,
+        "neurons_layer3": 128,
+        "learning_rate": 0.0005,
+        "batch_size": 64,
+        "dropout_rate": 0.2,
+        "lookback_window": 30,
+        "optimizer": "adam",
+        "dense_units": 128,
+        "use_bidirectional": true
+      },
+      "fitness": 0.07681324506879945,
+      "metrics": {
+        "rmse": 0.023349368944764137,
+        "mae": 0.01653354987502098,
+        "r2_score": 0.9442421758794632,
+        "mape": 2.0152684301137924,
+        "directional_accuracy": 48.63813229571984,
+        "explained_variance": 0.9442421758794632
+      },
+      "model_params": 688385
+    },
+    {
+      "genes": {
+        "n_lstm_layers": 1,
+        "neurons_layer1": 128,
+        "neurons_layer2": 256,
+        "neurons_layer3": 128,
+        "learning_rate": 0.001,
+        "batch_size": 32,
+        "dropout_rate": 0.1,
+        "lookback_window": 120,
+        "optimizer": "rmsprop",
+        "dense_units": 64,
+        "use_bidirectional": true
+      },
+      "fitness": 0.07713447552623875,
+      "metrics": {
+        "rmse": 0.025656063109636307,
+        "mae": 0.018223654478788376,
+        "r2_score": 0.9444722362942853,
+        "mape": 2.237812429666519,
+        "directional_accuracy": 49.700598802395206,
+        "explained_variance": 0.9444722362942853
+      },
+      "model_params": 196737
+    },
+    {
+      "genes": {
+        "n_lstm_layers": 1,
+        "neurons_layer1": 128,
+        "neurons_layer2": 128,
+        "neurons_layer3": 128,
+        "learning_rate": 0.001,
+        "batch_size": 16,
+        "dropout_rate": 0.4,
+        "lookback_window": 30,
+        "optimizer": "adam",
+        "dense_units": 128,
+        "use_bidirectional": true
+      },
+      "fitness": 0.07860822989186775,
+      "metrics": {
+        "rmse": 0.024662140756845474,
+        "mae": 0.017766153439879417,
+        "r2_score": 0.9377961754437433,
+        "mape": 2.152181603014469,
+        "directional_accuracy": 49.0272373540856,
+        "explained_variance": 0.9377961754437433
+      },
+      "model_params": 213249
+    },
+    {
+      "genes": {
+        "n_lstm_layers": 1,
+        "neurons_layer1": 256,
+        "neurons_layer2": 128,
+        "neurons_layer3": 128,
+        "learning_rate": 0.001,
+        "batch_size": 32,
+        "dropout_rate": 0.1,
+        "lookback_window": 120,
+        "optimizer": "rmsprop",
+        "dense_units": 64,
+        "use_bidirectional": true
+      },
+      "fitness": 0.07896984396005652,
+      "metrics": {
+        "rmse": 0.027255790308117867,
+        "mae": 0.019444243982434273,
+        "r2_score": 0.9373317208015807,
+        "mape": 2.3546840995550156,
+        "directional_accuracy": 50.29940119760479,
+        "explained_variance": 0.9373317208015807
+      },
+      "model_params": 655489
+    },
+    {
+      "genes": {
+        "n_lstm_layers": 1,
+        "neurons_layer1": 256,
+        "neurons_layer2": 256,
+        "neurons_layer3": 128,
+        "learning_rate": 0.0005,
+        "batch_size": 64,
+        "dropout_rate": 0.2,
+        "lookback_window": 90,
+        "optimizer": "rmsprop",
+        "dense_units": 64,
+        "use_bidirectional": true
+      },
+      "fitness": 0.07950278726849058,
+      "metrics": {
+        "rmse": 0.026720119640231133,
+        "mae": 0.019122760742902756,
+        "r2_score": 0.9384175506513482,
+        "mape": 2.3069001734256744,
+        "directional_accuracy": 49.23857868020304,
+        "explained_variance": 0.9384175506513482
+      },
+      "model_params": 655489
+    },
+    {
+      "genes": {
+        "n_lstm_layers": 1,
+        "neurons_layer1": 128,
+        "neurons_layer2": 128,
+        "neurons_layer3": 128,
+        "learning_rate": 0.001,
+        "batch_size": 64,
+        "dropout_rate": 0.1,
+        "lookback_window": 90,
+        "optimizer": "rmsprop",
+        "dense_units": 32,
+        "use_bidirectional": true
+      },
+      "fitness": 0.07986637103240848,
+      "metrics": {
+        "rmse": 0.026958275586366653,
+        "mae": 0.01928205043077469,
+        "r2_score": 0.9373148782558377,
+        "mape": 2.353374846279621,
+        "directional_accuracy": 49.23857868020304,
+        "explained_variance": 0.9373148782558377
+      },
+      "model_params": 188481
+    },
+    {
+      "genes": {
+        "n_lstm_layers": 2,
+        "neurons_layer1": 256,
+        "neurons_layer2": 256,
+        "neurons_layer3": 16,
+        "learning_rate": 0.001,
+        "batch_size": 32,
+        "dropout_rate": 0.1,
+        "lookback_window": 90,
+        "optimizer": "rmsprop",
+        "dense_units": 16,
+        "use_bidirectional": true
+      },
+      "fitness": 0.08054875243362283,
+      "metrics": {
+        "rmse": 0.02848663739860058,
+        "mae": 0.01972220651805401,
+        "r2_score": 0.9300057158071833,
+        "mape": 2.411660924553871,
+        "directional_accuracy": 50.76142131979695,
+        "explained_variance": 0.9300057158071833
+      },
+      "model_params": 2207777
+    },
+    {
+      "genes": {
+        "n_lstm_layers": 2,
+        "neurons_layer1": 256,
+        "neurons_layer2": 256,
+        "neurons_layer3": 32,
+        "learning_rate": 0.0005,
+        "batch_size": 128,
+        "dropout_rate": 0.1,
+        "lookback_window": 90,
+        "optimizer": "rmsprop",
+        "dense_units": 64,
+        "use_bidirectional": true
+      },
+      "fitness": 0.0806735318773235,
+      "metrics": {
+        "rmse": 0.029206404462456703,
+        "mae": 0.02017471008002758,
+        "r2_score": 0.9264239659273729,
+        "mape": 2.4673456326127052,
+        "directional_accuracy": 51.776649746192895,
+        "explained_variance": 0.9264239659273729
+      },
+      "model_params": 2232449
+    },
+    {
+      "genes": {
+        "n_lstm_layers": 1,
+        "neurons_layer1": 128,
+        "neurons_layer2": 128,
+        "neurons_layer3": 128,
+        "learning_rate": 0.005,
+        "batch_size": 64,
+        "dropout_rate": 0.1,
+        "lookback_window": 30,
+        "optimizer": "adam",
+        "dense_units": 128,
+        "use_bidirectional": true
+      },
+      "fitness": 0.08167571164209664,
+      "metrics": {
+        "rmse": 0.025308776646852493,
+        "mae": 0.018440693616867065,
+        "r2_score": 0.9344914751972384,
+        "mape": 2.2627752274274826,
+        "directional_accuracy": 47.081712062256805,
+        "explained_variance": 0.9344914751972384
+      },
+      "model_params": 213249
+    },
+    {
+      "genes": {
+        "n_lstm_layers": 1,
+        "neurons_layer1": 128,
+        "neurons_layer2": 128,
+        "neurons_layer3": 128,
+        "learning_rate": 0.0001,
+        "batch_size": 32,
+        "dropout_rate": 0.1,
+        "lookback_window": 120,
+        "optimizer": "rmsprop",
+        "dense_units": 64,
+        "use_bidirectional": true
+      },
+      "fitness": 0.0818695392471318,
+      "metrics": {
+        "rmse": 0.027689259499311447,
+        "mae": 0.019208457320928574,
+        "r2_score": 0.9353225506605244,
+        "mape": 2.3580171167850494,
+        "directional_accuracy": 47.90419161676647,
+        "explained_variance": 0.9353225506605244
+      },
+      "model_params": 196737
+    },
+    {
+      "genes": {
+        "n_lstm_layers": 2,
+        "neurons_layer1": 128,
+        "neurons_layer2": 256,
+        "neurons_layer3": 128,
+        "learning_rate": 0.0005,
+        "batch_size": 64,
+        "dropout_rate": 0.5,
+        "lookback_window": 30,
+        "optimizer": "adam",
+        "dense_units": 128,
+        "use_bidirectional": true
+      },
+      "fitness": 0.08194729375940708,
+      "metrics": {
+        "rmse": 0.027694037184119225,
+        "mae": 0.020515944808721542,
+        "r2_score": 0.9215617095547134,
+        "mape": 2.446325495839119,
+        "directional_accuracy": 50.97276264591439,
+        "explained_variance": 0.9215617095547134
+      },
+      "model_params": 1298689
+    },
+    {
+      "genes": {
+        "n_lstm_layers": 1,
+        "neurons_layer1": 128,
+        "neurons_layer2": 128,
+        "neurons_layer3": 128,
+        "learning_rate": 0.001,
+        "batch_size": 64,
+        "dropout_rate": 0.1,
+        "lookback_window": 90,
+        "optimizer": "rmsprop",
+        "dense_units": 32,
+        "use_bidirectional": true
+      },
+      "fitness": 0.08345122263342321,
+      "metrics": {
+        "rmse": 0.028349459171295166,
+        "mae": 0.01987605169415474,
+        "r2_score": 0.9306782025136607,
+        "mape": 2.449354901909828,
+        "directional_accuracy": 47.71573604060914,
+        "explained_variance": 0.9306782025136607
+      },
+      "model_params": 188481
+    },
+    {
+      "genes": {
+        "n_lstm_layers": 1,
+        "neurons_layer1": 256,
+        "neurons_layer2": 64,
+        "neurons_layer3": 64,
+        "learning_rate": 0.0001,
+        "batch_size": 32,
+        "dropout_rate": 0.5,
+        "lookback_window": 120,
+        "optimizer": "adam",
+        "dense_units": 128,
+        "use_bidirectional": true
+      },
+      "fitness": 0.08397422667168254,
+      "metrics": {
+        "rmse": 0.030954357236623764,
+        "mae": 0.023078151047229767,
+        "r2_score": 0.9191697777455597,
+        "mape": 2.804323099553585,
+        "directional_accuracy": 51.49700598802395,
+        "explained_variance": 0.9191697777455597
+      },
+      "model_params": 688385
+    },
+    {
+      "genes": {
+        "n_lstm_layers": 1,
+        "neurons_layer1": 128,
+        "neurons_layer2": 256,
+        "neurons_layer3": 128,
+        "learning_rate": 0.0001,
+        "batch_size": 64,
+        "dropout_rate": 0.5,
+        "lookback_window": 30,
+        "optimizer": "adam",
+        "dense_units": 128,
+        "use_bidirectional": true
+      },
+      "fitness": 0.08411348780119164,
+      "metrics": {
+        "rmse": 0.02879725769162178,
+        "mae": 0.022016428411006927,
+        "r2_score": 0.9151879057642238,
+        "mape": 2.632344327867031,
+        "directional_accuracy": 50.97276264591439,
+        "explained_variance": 0.9151879057642238
+      },
+      "model_params": 213249
+    },
+    {
+      "genes": {
+        "n_lstm_layers": 1,
+        "neurons_layer1": 128,
+        "neurons_layer2": 256,
+        "neurons_layer3": 128,
+        "learning_rate": 0.0001,
+        "batch_size": 16,
+        "dropout_rate": 0.1,
+        "lookback_window": 30,
+        "optimizer": "adam",
+        "dense_units": 16,
+        "use_bidirectional": true
+      },
+      "fitness": 0.08420451760774703,
+      "metrics": {
+        "rmse": 0.027573799714446068,
+        "mae": 0.020871324464678764,
+        "r2_score": 0.9222413366085759,
+        "mape": 2.4964207783341408,
+        "directional_accuracy": 48.63813229571984,
+        "explained_variance": 0.9222413366085759
+      },
+      "model_params": 184353
+    },
+    {
+      "genes": {
+        "n_lstm_layers": 1,
+        "neurons_layer1": 128,
+        "neurons_layer2": 256,
+        "neurons_layer3": 16,
+        "learning_rate": 0.001,
+        "batch_size": 32,
+        "dropout_rate": 0.1,
+        "lookback_window": 90,
+        "optimizer": "rmsprop",
+        "dense_units": 64,
+        "use_bidirectional": true
+      },
+      "fitness": 0.08541898508645926,
+      "metrics": {
+        "rmse": 0.03062017448246479,
+        "mae": 0.024168074131011963,
+        "r2_score": 0.9191284991961564,
+        "mape": 2.8107551857829094,
+        "directional_accuracy": 50.25380710659898,
+        "explained_variance": 0.9191284991961564
+      },
+      "model_params": 196737
+    },
+    {
+      "genes": {
+        "n_lstm_layers": 2,
+        "neurons_layer1": 256,
+        "neurons_layer2": 64,
+        "neurons_layer3": 64,
+        "learning_rate": 0.001,
+        "batch_size": 64,
+        "dropout_rate": 0.2,
+        "lookback_window": 30,
+        "optimizer": "rmsprop",
+        "dense_units": 32,
+        "use_bidirectional": false
+      },
+      "fitness": 0.08576405521314108,
+      "metrics": {
+        "rmse": 0.02818841114640236,
+        "mae": 0.020319558680057526,
+        "r2_score": 0.918736273352244,
+        "mape": 2.5004399940371513,
+        "directional_accuracy": 47.85992217898833,
+        "explained_variance": 0.918736273352244
+      },
+      "model_params": 395841
+    },
+    {
+      "genes": {
+        "n_lstm_layers": 2,
+        "neurons_layer1": 64,
+        "neurons_layer2": 128,
+        "neurons_layer3": 16,
+        "learning_rate": 0.005,
+        "batch_size": 128,
+        "dropout_rate": 0.5,
+        "lookback_window": 90,
+        "optimizer": "adam",
+        "dense_units": 64,
+        "use_bidirectional": true
+      },
+      "fitness": 0.08727612787392079,
+      "metrics": {
+        "rmse": 0.032901301980018616,
+        "mae": 0.024060996249318123,
+        "r2_score": 0.906630210233446,
+        "mape": 2.8937580063939095,
+        "directional_accuracy": 51.776649746192895,
+        "explained_variance": 0.906630210233446
+      },
+      "model_params": 338049
+    },
+    {
+      "genes": {
+        "n_lstm_layers": 2,
+        "neurons_layer1": 128,
+        "neurons_layer2": 256,
+        "neurons_layer3": 128,
+        "learning_rate": 0.0005,
+        "batch_size": 64,
+        "dropout_rate": 0.5,
+        "lookback_window": 30,
+        "optimizer": "adam",
+        "dense_units": 128,
+        "use_bidirectional": false
+      },
+      "fitness": 0.08901153206874754,
+      "metrics": {
+        "rmse": 0.03241607919335365,
+        "mae": 0.023602711036801338,
+        "r2_score": 0.8925326502012845,
+        "mape": 2.8954138979315758,
+        "directional_accuracy": 52.52918287937744,
+        "explained_variance": 0.8925326502012845
+      },
+      "model_params": 518401
+    },
+    {
+      "genes": {
+        "n_lstm_layers": 2,
+        "neurons_layer1": 256,
+        "neurons_layer2": 256,
+        "neurons_layer3": 64,
+        "learning_rate": 0.001,
+        "batch_size": 32,
+        "dropout_rate": 0.3,
+        "lookback_window": 30,
+        "optimizer": "adam",
+        "dense_units": 128,
+        "use_bidirectional": true
+      },
+      "fitness": 0.08969730400367962,
+      "metrics": {
+        "rmse": 0.02926921285688877,
+        "mae": 0.022567180916666985,
+        "r2_score": 0.9123851673427535,
+        "mape": 2.6370717212557793,
+        "directional_accuracy": 46.30350194552529,
+        "explained_variance": 0.9123851673427535
+      },
+      "model_params": 2265345
+    },
+    {
+      "genes": {
+        "n_lstm_layers": 1,
+        "neurons_layer1": 128,
+        "neurons_layer2": 128,
+        "neurons_layer3": 128,
+        "learning_rate": 0.0001,
+        "batch_size": 64,
+        "dropout_rate": 0.5,
+        "lookback_window": 30,
+        "optimizer": "adam",
+        "dense_units": 128,
+        "use_bidirectional": true
+      },
+      "fitness": 0.10101884558536332,
+      "metrics": {
+        "rmse": 0.03728368505835533,
+        "mae": 0.03141103312373161,
+        "r2_score": 0.8578348280622619,
+        "mape": 3.7040401250123978,
+        "directional_accuracy": 51.75097276264592,
+        "explained_variance": 0.8578348280622619
+      },
+      "model_params": 213249
+    },
+    {
+      "genes": {
+        "n_lstm_layers": 1,
+        "neurons_layer1": 128,
+        "neurons_layer2": 128,
+        "neurons_layer3": 128,
+        "learning_rate": 0.001,
+        "batch_size": 64,
+        "dropout_rate": 0.5,
+        "lookback_window": 120,
+        "optimizer": "rmsprop",
+        "dense_units": 32,
+        "use_bidirectional": false
+      },
+      "fitness": 0.11132700863643676,
+      "metrics": {
+        "rmse": 0.044471174478530884,
+        "mae": 0.036899082362651825,
+        "r2_score": 0.8331649113547839,
+        "mape": 4.29750420153141,
+        "directional_accuracy": 50.898203592814376,
+        "explained_variance": 0.8331649113547839
+      },
+      "model_params": 94273
+    },
+    {
+      "genes": {
+        "n_lstm_layers": 2,
+        "neurons_layer1": 128,
+        "neurons_layer2": 256,
+        "neurons_layer3": 128,
+        "learning_rate": 0.0005,
+        "batch_size": 64,
+        "dropout_rate": 0.4,
+        "lookback_window": 90,
+        "optimizer": "rmsprop",
+        "dense_units": 32,
+        "use_bidirectional": true
+      },
+      "fitness": 0.11649540374587566,
+      "metrics": {
+        "rmse": 0.046572525054216385,
+        "mae": 0.03906118869781494,
+        "r2_score": 0.8129146367608023,
+        "mape": 4.464495927095413,
+        "directional_accuracy": 51.26903553299492,
+        "explained_variance": 0.8129146367608023
+      },
+      "model_params": 1249345
+    },
+    {
+      "genes": {
+        "n_lstm_layers": 1,
+        "neurons_layer1": 128,
+        "neurons_layer2": 64,
+        "neurons_layer3": 64,
+        "learning_rate": 0.001,
+        "batch_size": 16,
+        "dropout_rate": 0.4,
+        "lookback_window": 30,
+        "optimizer": "sgd",
+        "dense_units": 128,
+        "use_bidirectional": true
+      },
+      "fitness": 0.1970625537238856,
+      "metrics": {
+        "rmse": 0.07102756947278976,
+        "mae": 0.0573735274374485,
+        "r2_score": 0.4840477976690948,
+        "mape": 6.585614383220673,
+        "directional_accuracy": 51.75097276264592,
+        "explained_variance": 0.4840477976690948
+      },
+      "model_params": 213249
+    }
+  ],
+  "best_chromosome": {
+    "genes": {
+      "n_lstm_layers": 1,
+      "neurons_layer1": 256,
+      "neurons_layer2": 128,
+      "neurons_layer3": 128,
+      "learning_rate": 0.0001,
+      "batch_size": 16,
+      "dropout_rate": 0.1,
+      "lookback_window": 30,
+      "optimizer": "adam",
+      "dense_units": 128,
+      "use_bidirectional": true
+    },
+    "fitness": 0.07524232482598614,
+    "metrics": {
+      "rmse": 0.023109637200832367,
+      "mae": 0.01626722142100334,
+      "r2_score": 0.9453812450491534,
+      "mape": 1.9614674150943756,
+      "directional_accuracy": 49.80544747081712,
+      "explained_variance": 0.9453812450491534
+    },
+    "model_params": 688385
+  },
+  "history": {
+    "generation": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "best_fitness": [
+      0.07878576773220441,
+      0.07612434933224449,
+      0.07611199504824771,
+      0.07524232482598614,
+      0.07524232482598614
+    ],
+    "average_fitness": [
+      0.29930661862916325,
+      0.09605184591571499,
+      0.08959980540310343,
+      0.09544105654282446,
+      0.08774006684094408
+    ],
+    "worst_fitness": [
+      2.18140936324316,
+      0.23191672980562406,
+      0.1591580184194621,
+      0.30024846284499646,
+      0.1970625537238856
+    ],
+    "std_fitness": [
+      0.5777838213578534,
+      0.0310962365770811,
+      0.016592563499720343,
+      0.04126603963482807,
+      0.022468904432851038
+    ]
+  },
+  "evaluator_count": 165
+}

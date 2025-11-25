@@ -33,10 +33,7 @@ data/processed/*.csv
 saved_models/*.h5
 saved_models/*.json
 
-# Results
-results/*.png
-results/*.csv
-results/*.json
+
 
 # Logs
 logs/*.log

@@ -133,6 +133,73 @@ class Chromosome:
         new_chromosome.model_params = self.model_params
         return new_chromosome
     
+    def _convert_to_json_serializable(self, obj):
+        """
+        Convert numpy types to Python native types for JSON serialization
+        
+        Args:
+            obj: Object to convert
+            
+        Returns:
+            JSON-serializable object
+        """
+        if isinstance(obj, (np.integer, np.int64, np.int32)):
+            return int(obj)
+        elif isinstance(obj, (np.floating, np.float64, np.float32)):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        elif isinstance(obj, dict):
+            return {key: self._convert_to_json_serializable(value) for key, value in obj.items()}
+        elif isinstance(obj, (list, tuple)):
+            return [self._convert_to_json_serializable(item) for item in obj]
+        else:
+            return obj
+    
+    def to_dict(self):
+        """
+        Convert chromosome to dictionary (JSON-serializable)
+        
+        Returns:
+            Dictionary representation
+        """
+        # Convert fitness
+        fitness_val = None
+        if self.fitness is not None:
+            fitness_val = float(self.fitness) if not np.isinf(self.fitness) else None
+        
+        # Convert metrics
+        metrics_val = None
+        if self.metrics is not None:
+            metrics_val = self._convert_to_json_serializable(self.metrics)
+        
+        # Convert model params
+        model_params_val = int(self.model_params) if self.model_params else 0
+        
+        return {
+            'genes': self._convert_to_json_serializable(self.genes),
+            'fitness': fitness_val,
+            'metrics': metrics_val,
+            'model_params': model_params_val
+        }
+    
+    @classmethod
+    def from_dict(cls, data):
+        """
+        Create chromosome from dictionary
+        
+        Args:
+            data: Dictionary with chromosome data
+            
+        Returns:
+            New chromosome
+        """
+        chromosome = cls(data['genes'])
+        chromosome.fitness = data.get('fitness')
+        chromosome.metrics = data.get('metrics')
+        chromosome.model_params = data.get('model_params', 0)
+        return chromosome
+    
     def __str__(self):
         """
         String representation
@@ -181,34 +248,3 @@ class Chromosome:
         if not isinstance(other, Chromosome):
             return False
         return self.genes == other.genes
-    
-    def to_dict(self):
-        """
-        Convert chromosome to dictionary
-        
-        Returns:
-            Dictionary representation
-        """
-        return {
-            'genes': self.genes,
-            'fitness': self.fitness,
-            'metrics': self.metrics,
-            'model_params': self.model_params
-        }
-    
-    @classmethod
-    def from_dict(cls, data):
-        """
-        Create chromosome from dictionary
-        
-        Args:
-            data: Dictionary with chromosome data
-            
-        Returns:
-            New chromosome
-        """
-        chromosome = cls(data['genes'])
-        chromosome.fitness = data.get('fitness')
-        chromosome.metrics = data.get('metrics')
-        chromosome.model_params = data.get('model_params', 0)
-        return chromosome

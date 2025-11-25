@@ -407,7 +407,7 @@ def run_baseline_model(data_dict, scalers):
     return metrics, predictions
 
 
-def run_genetic_algorithm(data_dict, population_size, generations):
+def run_genetic_algorithm(data_dict, population_size, generations, resume_from=None):
     """
     Run genetic algorithm optimization
     
@@ -415,6 +415,7 @@ def run_genetic_algorithm(data_dict, population_size, generations):
         data_dict: Dictionary with prepared data
         population_size: GA population size
         generations: Number of generations
+        resume_from: Checkpoint file to resume from (optional)
         
     Returns:
         Genetic Algorithm instance
@@ -431,6 +432,12 @@ def run_genetic_algorithm(data_dict, population_size, generations):
         logger.info("💻 GA will utilize CPU for model training")
     
     ga = GeneticAlgorithm(data_dict, population_size, generations)
+    
+    # Resume from checkpoint if provided
+    if resume_from:
+        logger.info(f"📂 Resuming from checkpoint: {resume_from}")
+        ga.load_checkpoint(resume_from)
+    
     ga.evolve()
     
     # Save results
