@@ -1,0 +1,31 @@
+# Build tools
+setuptools>=65.0.0
+wheel>=0.40.0
+
+# Data Collection
+yfinance==0.2.38
+pandas==2.1.4
+numpy==1.26.4
+
+# Technical Analysis
+ta==0.11.0
+
+# Machine Learning
+tensorflow==2.16.2
+scikit-learn==1.4.2
+
+# Visualization
+matplotlib==3.8.4
+seaborn==0.13.2
+plotly==5.20.0
+
+# Optimization
+deap==1.4.1
+
+# Utilities
+joblib==1.4.2
+tqdm==4.66.2
+scipy==1.13.0
+
+# Logging
+colorlog==6.8.2
